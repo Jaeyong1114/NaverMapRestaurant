@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.navermaprestaurant.databinding.ActivityMainBinding
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
@@ -19,6 +20,9 @@ import retrofit2.Response
 class MainActivity : AppCompatActivity(), OnMapReadyCallback{
     private lateinit var binding : ActivityMainBinding
     private lateinit var naverMap : NaverMap
+    private var restaurantListAdpater = RestaurantListAdpater{
+        // 카메라 움직임
+    }
     private var isMapInit = false //맵이 초기화 됐는지 안됐는지 확인
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +33,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
         binding.mapView.getMapAsync(this)
         binding.bottomSheetLayout.searchResultRecyclerView.apply{
 
+            layoutManager=LinearLayoutManager(context)
+            adapter=restaurantListAdpater
         }
 
         binding.searchView.setOnQueryTextListener(object : OnQueryTextListener{
@@ -56,6 +62,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
                                     map = naverMap
                                 }
                             }
+
+                            restaurantListAdpater.submitList(searchItemList)
+
                             val cameraUpdate = CameraUpdate.scrollTo( markers.first().position)
                                 .animate(CameraAnimation.Easing)
                             naverMap.moveCamera(cameraUpdate) //검색결과의 첫번쨰 결과값으로 포지션 이동
