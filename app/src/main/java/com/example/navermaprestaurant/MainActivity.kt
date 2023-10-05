@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
 
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
+        binding.bottomSheetLayout.searchResultRecyclerView.apply{
+
+        }
 
         binding.searchView.setOnQueryTextListener(object : OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
