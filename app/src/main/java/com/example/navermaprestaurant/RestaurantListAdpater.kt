@@ -18,7 +18,7 @@ class RestaurantListAdpater(private val onClick:(LatLng) -> Unit) : ListAdapter<
             binding.categoryTextView.text = item.category
             binding.locationTextView.text = item.address
             binding.root.setOnClickListener {
-                onClick(LatLng(item.mapy.toDouble()/10000000,item.mapx.toDouble()/110000000))
+                onClick(LatLng(item.mapy.toDouble()/10000000,item.mapx.toDouble()/10000000))
             }
 
         }

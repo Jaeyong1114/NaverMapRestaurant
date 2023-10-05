@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
     private lateinit var naverMap : NaverMap
     private var restaurantListAdpater = RestaurantListAdpater{
         // 카메라 움직임
+
+        moveCamera(it)
+
     }
     private var isMapInit = false //맵이 초기화 됐는지 안됐는지 확인
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,16 +61,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
 
                             val markers = searchItemList.map{
                                 Marker(LatLng(it.mapy.toDouble()/10000000,it.mapx.toDouble()/10000000)).apply{
+                                    Log.d("test","${it.mapy}")
                                     captionText=it.title
                                     map = naverMap
                                 }
                             }
 
                             restaurantListAdpater.submitList(searchItemList)
+                            moveCamera(markers.first().position)
 
-                            val cameraUpdate = CameraUpdate.scrollTo( markers.first().position)
-                                .animate(CameraAnimation.Easing)
-                            naverMap.moveCamera(cameraUpdate) //검색결과의 첫번쨰 결과값으로 포지션 이동
+
 
 
                         }
@@ -94,6 +97,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
 
 
     }
+
+
+    private fun moveCamera(position: LatLng){
+        if( isMapInit.not()) return
+        val cameraUpdate = CameraUpdate.scrollTo(position)
+            .animate(CameraAnimation.Easing)
+        naverMap.moveCamera(cameraUpdate)
+        Log.d("positionTest","${position}")
+
+    }
+
 
     override fun onStart() {
         super.onStart()
