@@ -3,12 +3,15 @@ package com.example.navermaprestaurant
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import com.example.navermaprestaurant.databinding.ActivityMainBinding
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.Marker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,15 +28,55 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
 
-        SearchRepository.getRestaurant("서울").enqueue(object : Callback<SearchResult>{
-            override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
-                Log.e("aa","${response.body().toString()}")
+        binding.searchView.setOnQueryTextListener(object : OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                if(query?.isNotEmpty() == true){
+                    SearchRepository.getRestaurant(query).enqueue(object : Callback<SearchResult>{
+                        override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
+
+                            val searchItemList = response.body()?.items.orEmpty()
+                            if(searchItemList.isEmpty()){
+                                Toast.makeText(this@MainActivity,"검색 결과가 없습니다 ",Toast.LENGTH_SHORT).show()
+                                return
+
+                            } else if(isMapInit.not()){
+                                Toast.makeText(this@MainActivity,"오류가 발생했습니다 ",Toast.LENGTH_SHORT).show()
+
+                                return
+                            }
+
+
+                            val markers = searchItemList.map{
+                                Marker(LatLng(it.mapy.toDouble()/10000000,it.mapx.toDouble()/10000000)).apply{
+                                    captionText=it.title
+                                    map = naverMap
+                                }
+                            }
+                            val cameraUpdate = CameraUpdate.scrollTo( markers.first().position)
+                                .animate(CameraAnimation.Easing)
+                            naverMap.moveCamera(cameraUpdate) //검색결과의 첫번쨰 결과값으로 포지션 이동
+
+
+                        }
+
+                        override fun onFailure(call: Call<SearchResult>, t: Throwable) {
+
+                        }
+                    })
+                    return false
+                }else {
+                    return true
+                }
+
             }
 
-            override fun onFailure(call: Call<SearchResult>, t: Throwable) {
-
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
             }
         })
+
+
 
 
 
